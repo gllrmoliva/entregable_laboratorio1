@@ -5,12 +5,11 @@
 #include "svpng.inc"
 #include "small_mario_rgb.h"
 
-
 #define H_IMG 1000
 #define W_IMG 1000
 
-#define INIT_Y H_IMG/2
-#define INIT_X W_IMG/2
+#define INIT_Y H_IMG / 2
+#define INIT_X W_IMG / 2
 
 // Ver más colores en https://htmlcolorcodes.com/
 #define DEFAULT_R 254
