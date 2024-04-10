@@ -13,9 +13,10 @@ int main()
     moving_image im;
 
     im.draw("imagen.png");
-    im.move_left(500);
+    im.rotate();
+    im.undorotate();
     sleep(2);
-    im.draw("imagen_desplazada_500.png");
+    im.draw("imagen_rotadamasmenos90grados.png");
     im.move_left(100);
     sleep(2);
     im.draw("imagen_desplazada_600.png");
