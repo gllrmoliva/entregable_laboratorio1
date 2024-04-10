@@ -2,6 +2,7 @@
 #define MOVING_IMG_H
 
 #include "basics.h"
+#include <iostream>
 
 // Clase que representa una imagen como una colección de 3 matrices siguiendo el
 // esquema de colores RGB
@@ -121,6 +122,118 @@ public:
         for (int i = 0; i < H_IMG; i++)
             for (int j = 0; j < W_IMG; j++)
                 blue_layer[i][j] = tmp_layer[i][j];
+    }
+
+    //--------------- DESDE AQUÍ EN ADELANTE HAY FUNCIONES HECHAS PARA LA TAREA ---------------
+
+    // Función que similar desplazar la imagen, de manera circular, d pixeles a la derecha
+    void move_right(int d)
+    {
+        unsigned char tmp_layer[H_IMG][W_IMG];
+
+        // Mover la capa roja hacia la derecha
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = d; j < W_IMG; j++)
+                tmp_layer[i][j] = red_layer[i][j - d];
+
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = 0, k = W_IMG - d; j < d; j++, k++)
+                tmp_layer[i][j] = red_layer[i][k];
+
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = 0; j < W_IMG; j++)
+                red_layer[i][j] = tmp_layer[i][j];
+
+        // Mover la capa verde hacia la derecha
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = d; j < W_IMG; j++)
+                tmp_layer[i][j] = green_layer[i][j - d];
+
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = 0, k = W_IMG - d; j < d; j++, k++)
+                tmp_layer[i][j] = green_layer[i][k];
+
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = 0; j < W_IMG; j++)
+                green_layer[i][j] = tmp_layer[i][j];
+
+        // Mover la capa azul hacia la derecha
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = d; j < W_IMG; j++)
+                tmp_layer[i][j] = blue_layer[i][j - d];
+
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = 0, k = W_IMG - d; j < d; j++, k++)
+                tmp_layer[i][j] = blue_layer[i][k];
+
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = 0; j < W_IMG; j++)
+                blue_layer[i][j] = tmp_layer[i][j];
+    }
+
+    // toda +90 grados
+    void rotate()
+    {
+        // Rotamos la capa roja
+        // Transponemos la matriz
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = i + 1; j < W_IMG; j++)
+                std::swap(red_layer[i][j], red_layer[j][i]);
+        // Reflejamos la matriz horizontalmente
+        for (int i = 0; i < H_IMG / 2; i++)
+            for (int j = 0; j < W_IMG; j++)
+                std::swap(red_layer[i][j], red_layer[H_IMG - i - 1][j]);
+
+        // Rotamos la capa azul
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = i + 1; j < W_IMG; j++)
+                std::swap(blue_layer[i][j], blue_layer[j][i]);
+
+        for (int i = 0; i < H_IMG / 2; i++)
+            for (int j = 0; j < W_IMG; j++)
+                std::swap(blue_layer[i][j], blue_layer[H_IMG - i - 1][j]);
+
+        // Rotamos la capa verde
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = i + 1; j < W_IMG; j++)
+                std::swap(green_layer[i][j], green_layer[j][i]);
+
+        for (int i = 0; i < H_IMG / 2; i++)
+            for (int j = 0; j < W_IMG; j++)
+                std::swap(green_layer[i][j], green_layer[H_IMG - i - 1][j]);
+    }
+
+    // todo: no me gusta mucho esto, pero es la forma mas facil de hacerlo
+    // toda -90 grados
+    void undorotate()
+    {
+        // Rotamos la capa roja
+        // Reflejamos la matriz horizontalmente
+        for (int i = 0; i < H_IMG / 2; i++)
+            for (int j = 0; j < W_IMG; j++)
+                std::swap(red_layer[i][j], red_layer[H_IMG - i - 1][j]);
+        // Transponemos la matriz
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = i + 1; j < W_IMG; j++)
+                std::swap(red_layer[i][j], red_layer[j][i]);
+
+        // Rotamos la capa azul
+        for (int i = 0; i < H_IMG / 2; i++)
+            for (int j = 0; j < W_IMG; j++)
+                std::swap(blue_layer[i][j], blue_layer[H_IMG - i - 1][j]);
+
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = i + 1; j < W_IMG; j++)
+                std::swap(blue_layer[i][j], blue_layer[j][i]);
+
+        // Rotamos la capa verde
+        for (int i = 0; i < H_IMG / 2; i++)
+            for (int j = 0; j < W_IMG; j++)
+                std::swap(green_layer[i][j], green_layer[H_IMG - i - 1][j]);
+
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = i + 1; j < W_IMG; j++)
+                std::swap(green_layer[i][j], green_layer[j][i]);
     }
 
 private:
