@@ -12,15 +12,12 @@ int main()
 {
     moving_image im;
 
-    im.draw("imagen.png");
-    im.rotate();
-    im.undorotate();
-    sleep(2);
-    im.draw("imagen_rotadamasmenos90grados.png");
-    im.move_left(100);
-    sleep(2);
-    im.draw("imagen_desplazada_600.png");
-
+    im.draw("imagen1.png");
+    im.move_up(0);
+    im.draw("imagen2.png");
+    im.move_down(0);
+    im.draw("imagen3.png");
+    
     /* NOTA 1: Si usan el mismo nombre para las imágenes, entonces cada llamada al
     método draw() sobreescribirá a la imagen */
 
