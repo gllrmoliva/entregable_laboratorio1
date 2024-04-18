@@ -129,6 +129,7 @@ public:
     // Función que similar desplazar la imagen, de manera circular, d pixeles a la derecha
     void move_right(int d)
     {
+
         unsigned char tmp_layer[H_IMG][W_IMG];
 
         // Mover la capa roja hacia la derecha
@@ -170,6 +171,75 @@ public:
             for (int j = 0; j < W_IMG; j++)
                 blue_layer[i][j] = tmp_layer[i][j];
     }
+
+    // Función que similar desplazar la imagen, de manera circular, d pixeles hacia abajo
+    void move_down(int d)
+    {
+        unsigned char tmp_layer[H_IMG][W_IMG];
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = 0; j < W_IMG; j++)
+                tmp_layer[(i + d) % H_IMG][j] = red_layer[i][j];
+
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = 0; j < W_IMG; j++)
+                red_layer[i][j] = tmp_layer[i][j];
+
+
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = 0; j < W_IMG; j++)
+                tmp_layer[(i + d) % H_IMG][j] = green_layer[i][j];
+
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = 0; j < W_IMG; j++)
+                green_layer[i][j] = tmp_layer[i][j];
+
+
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = 0; j < W_IMG; j++)
+                tmp_layer[(i + d) % H_IMG][j] = blue_layer[i][j];
+
+
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = 0; j < W_IMG; j++)
+                blue_layer[i][j] = tmp_layer[i][j];
+    }
+
+
+    // Función que similar desplazar la imagen, de manera circular, d pixeles arriba
+    void move_up(int d)
+    {
+        unsigned char tmp_layer[H_IMG][W_IMG];
+
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = 0; j < W_IMG; j++)
+                tmp_layer[i][j] = red_layer[(i + d) % H_IMG][j];
+
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = 0; j < W_IMG; j++)
+                red_layer[i][j] = tmp_layer[i][j];
+
+
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = 0; j < W_IMG; j++)
+                tmp_layer[i][j] = green_layer[(i + d) % H_IMG][j];
+
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = 0; j < W_IMG; j++)
+                green_layer[i][j] = tmp_layer[i][j];
+
+
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = 0; j < W_IMG; j++)
+                tmp_layer[i][j] = blue_layer[(i + d) % H_IMG][j];
+
+
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = 0; j < W_IMG; j++)
+                blue_layer[i][j] = tmp_layer[i][j];
+    }
+
+
+    // Función que similar desplazar la imagen, de manera circular, d pixeles a la derecha
 
     // toda +90 grados
     void rotate()
