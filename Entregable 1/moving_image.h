@@ -306,6 +306,14 @@ public:
                 std::swap(green_layer[i][j], green_layer[j][i]);
     }
 
+    void undo() {
+        return;
+    }
+
+    void redo() {
+        return;
+    }
+
 private:
     // Función privada que guarda la imagen en formato .png
     void _draw(const char *nb)

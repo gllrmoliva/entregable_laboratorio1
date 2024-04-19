@@ -6,17 +6,17 @@
  */
 
 #include "moving_image.h"
+#include "command.h"
 #include <unistd.h> // para sleep (linux). Usar  #include<windows.h> para Windows
 
 int main()
 {
     moving_image im;
 
-    im.draw("imagen1.png");
-    im.move_up(0);
-    im.draw("imagen2.png");
-    im.move_down(0);
-    im.draw("imagen3.png");
+    Movement newMov = Movement(MOVE_LEFT, 10);
+    std::cout << newMov.command << std::endl;
+    std::cout << newMov.inv_command << std::endl;
+
     
     /* NOTA 1: Si usan el mismo nombre para las imágenes, entonces cada llamada al
     método draw() sobreescribirá a la imagen */
