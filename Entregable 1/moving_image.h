@@ -22,6 +22,36 @@ private:
 
     std::queue<Movement> all_movements; // Todavía no se muy bien que vamos a hacer con este
 
+    // Función para realizar un movimiento en base al struct de Movement. 
+    void move_from_movement(Movement movement) {
+        Command cmd = movement.command;
+        int arg = movement.arg;
+        switch (cmd)
+        {
+        case MOVE_LEFT:
+            move_left(arg);
+            break;
+        case MOVE_RIGHT:
+            move_right(arg);
+            break;
+        case MOVE_UP:
+            move_up(arg);
+            break;
+        case MOVE_DOWN:
+            move_down(arg);
+            break;
+        case ROTATE:
+            rotate();
+            break;
+        case UNDO_ROTATE:
+            undorotate();
+            break;
+
+        default:
+            break;
+        }
+    }
+
 public:
     // Constructor de la imagen. Se crea una imagen por defecto
     moving_image()
@@ -350,13 +380,43 @@ public:
         }
     }
 
+
     void undo()
     {
-        return;
+        // Removemos el movimiento del historial
+        Movement last_movement(history_stack.top());
+        history_stack.pop();
+
+        // Lo dejamos en el stack de undo.
+        undo_stack.push(last_movement);
+        std::cout << std::endl;
+
+        // Calculamos el movimiento inverso
+        Command inverse_command = last_movement.inv_command;
+        Movement inverse_movement = Movement(inverse_command, last_movement.arg);
+        
+        std::stack<Movement> stack_previo(undo_stack); 
+        // uh oooh problemaaaaa, esto se pitea el stack de undo!!!
+        move_from_movement(inverse_movement);
+        // pero vuelve desde las cenizas!
+        this->undo_stack = stack_previo;
+
+        // No queremos que el movimiento inverso quede en el stack de movimientos.
+        // Esto es feo, pero es la manera más directa de hacerlo por ahora:
+        history_stack.pop();
     }
 
     void redo()
     {
+        // Removemos el movimiento del historial
+        Movement last_undo(undo_stack.top());
+        undo_stack.pop();
+
+        std::stack<Movement> stack_previo(undo_stack); 
+        // uh oooh problemaaaaa, esto se pitea el stack de undo!!!
+        move_from_movement(last_undo); 
+        // pero vuelve desde las cenizas!
+        this->undo_stack = stack_previo;
         return;
     }
 
@@ -368,30 +428,8 @@ public:
     {
         Movement last_movement(history_stack.top());
 
-        switch (last_movement.command)
-        {
-        case MOVE_LEFT:
-            move_left(last_movement.arg);
-            break;
-        case MOVE_RIGHT:
-            move_right(last_movement.arg);
-            break;
-        case MOVE_UP:
-            move_up(last_movement.arg);
-            break;
-        case MOVE_DOWN:
-            move_down(last_movement.arg);
-            break;
-        case ROTATE:
-            rotate();
-            break;
-        case UNDO_ROTATE:
-            undorotate();
-            break;
-
-        default:
-            break;
-        }
+        move_from_movement(last_movement);
+        
     }
 
     // Imprime en la terminal los stacks, solo para debug
@@ -408,12 +446,11 @@ public:
         }
         std::cout << "NULL";
 
-        std::cout << std::endl
-                  << "UNDOS" << std::endl;
-        while (!historial.empty())
+        std::cout << std::endl << "UNDOS" << std::endl;
+        while (!undos.empty())
         {
-            std::cout << historial.top().to_string() << " => ";
-            historial.pop();
+            std::cout << undos.top().to_string() << " => ";
+            undos.pop();
         }
         std::cout << "NULL" << std::endl;
     }
