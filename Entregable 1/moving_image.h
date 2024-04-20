@@ -4,6 +4,10 @@
 #include "basics.h"
 #include <iostream>
 
+#include <stack>
+#include <queue>
+#include "command.h"
+
 // Clase que representa una imagen como una colección de 3 matrices siguiendo el
 // esquema de colores RGB
 
@@ -13,6 +17,10 @@ private:
     unsigned char **red_layer;   // Capa de tonalidades rojas
     unsigned char **green_layer; // Capa de tonalidades verdes
     unsigned char **blue_layer;  // Capa de tonalidades azules
+    std::stack<Movement> history_stack;
+    std::stack<Movement> undo_stack;
+
+    std::queue<Movement> all_movements; // Todavía no se muy bien que vamos a hacer con este
 
 public:
     // Constructor de la imagen. Se crea una imagen por defecto
@@ -122,9 +130,15 @@ public:
         for (int i = 0; i < H_IMG; i++)
             for (int j = 0; j < W_IMG; j++)
                 blue_layer[i][j] = tmp_layer[i][j];
-    }
 
-    //--------------- DESDE AQUÍ EN ADELANTE HAY FUNCIONES HECHAS PARA LA TAREA ---------------
+        history_stack.push(Movement(MOVE_LEFT, d));
+
+        // Por ahora solo voy a eliminar con pop los elementos de stack, aunque esto no es lo mas optimo
+        while (!undo_stack.empty())
+        {
+            undo_stack.pop();
+        }
+    }
 
     // Función que similar desplazar la imagen, de manera circular, d pixeles a la derecha
     void move_right(int d)
@@ -170,6 +184,13 @@ public:
         for (int i = 0; i < H_IMG; i++)
             for (int j = 0; j < W_IMG; j++)
                 blue_layer[i][j] = tmp_layer[i][j];
+        history_stack.push(Movement(MOVE_RIGHT, d));
+
+        // Por ahora solo voy a eliminar con pop los elementos de stack, aunque esto no es lo mas optimo
+        while (!undo_stack.empty())
+        {
+            undo_stack.pop();
+        }
     }
 
     // Función que similar desplazar la imagen, de manera circular, d pixeles hacia abajo
@@ -184,7 +205,6 @@ public:
             for (int j = 0; j < W_IMG; j++)
                 red_layer[i][j] = tmp_layer[i][j];
 
-
         for (int i = 0; i < H_IMG; i++)
             for (int j = 0; j < W_IMG; j++)
                 tmp_layer[(i + d) % H_IMG][j] = green_layer[i][j];
@@ -193,17 +213,21 @@ public:
             for (int j = 0; j < W_IMG; j++)
                 green_layer[i][j] = tmp_layer[i][j];
 
-
         for (int i = 0; i < H_IMG; i++)
             for (int j = 0; j < W_IMG; j++)
                 tmp_layer[(i + d) % H_IMG][j] = blue_layer[i][j];
 
-
         for (int i = 0; i < H_IMG; i++)
             for (int j = 0; j < W_IMG; j++)
                 blue_layer[i][j] = tmp_layer[i][j];
-    }
+        history_stack.push(Movement(MOVE_DOWN, d));
 
+        // Por ahora solo voy a eliminar con pop los elementos de stack, aunque esto no es lo mas optimo
+        while (!undo_stack.empty())
+        {
+            undo_stack.pop();
+        }
+    }
 
     // Función que similar desplazar la imagen, de manera circular, d pixeles arriba
     void move_up(int d)
@@ -218,7 +242,6 @@ public:
             for (int j = 0; j < W_IMG; j++)
                 red_layer[i][j] = tmp_layer[i][j];
 
-
         for (int i = 0; i < H_IMG; i++)
             for (int j = 0; j < W_IMG; j++)
                 tmp_layer[i][j] = green_layer[(i + d) % H_IMG][j];
@@ -227,17 +250,22 @@ public:
             for (int j = 0; j < W_IMG; j++)
                 green_layer[i][j] = tmp_layer[i][j];
 
-
         for (int i = 0; i < H_IMG; i++)
             for (int j = 0; j < W_IMG; j++)
                 tmp_layer[i][j] = blue_layer[(i + d) % H_IMG][j];
 
-
         for (int i = 0; i < H_IMG; i++)
             for (int j = 0; j < W_IMG; j++)
                 blue_layer[i][j] = tmp_layer[i][j];
-    }
 
+        history_stack.push(Movement(MOVE_UP, d));
+
+        // Por ahora solo voy a eliminar con pop los elementos de stack, aunque esto no es lo mas optimo
+        while (!undo_stack.empty())
+        {
+            undo_stack.pop();
+        }
+    }
 
     // Función que similar desplazar la imagen, de manera circular, d pixeles a la derecha
 
@@ -271,6 +299,14 @@ public:
         for (int i = 0; i < H_IMG / 2; i++)
             for (int j = 0; j < W_IMG; j++)
                 std::swap(green_layer[i][j], green_layer[H_IMG - i - 1][j]);
+
+        history_stack.push(Movement(ROTATE, 0));
+
+        // Por ahora solo voy a eliminar con pop los elementos de stack, aunque esto no es lo mas optimo
+        while (!undo_stack.empty())
+        {
+            undo_stack.pop();
+        }
     }
 
     // todo: no me gusta mucho esto, pero es la forma mas facil de hacerlo
@@ -304,14 +340,82 @@ public:
         for (int i = 0; i < H_IMG; i++)
             for (int j = i + 1; j < W_IMG; j++)
                 std::swap(green_layer[i][j], green_layer[j][i]);
+
+        history_stack.push(Movement(UNDO_ROTATE, 0));
+
+        // Por ahora solo voy a eliminar con pop los elementos de stack, aunque esto no es lo mas optimo
+        while (!undo_stack.empty())
+        {
+            undo_stack.pop();
+        }
     }
 
-    void undo() {
+    void undo()
+    {
         return;
     }
 
-    void redo() {
+    void redo()
+    {
         return;
+    }
+
+    // todo:  vamos a tener que pensar el caso undo() -> repeat() -> repeat()
+    // imagino que en este caso se deberia hacer undo 3 veces ¿?
+    // quizas añadir un bit is repeated??? en command, con eso creo que se puede solucionar pero no se
+    // si seria sobreingenieria para algo mas simple
+    void repeat()
+    {
+        Movement last_movement(history_stack.top());
+
+        switch (last_movement.command)
+        {
+        case MOVE_LEFT:
+            move_left(last_movement.arg);
+            break;
+        case MOVE_RIGHT:
+            move_right(last_movement.arg);
+            break;
+        case MOVE_UP:
+            move_up(last_movement.arg);
+            break;
+        case MOVE_DOWN:
+            move_down(last_movement.arg);
+            break;
+        case ROTATE:
+            rotate();
+            break;
+        case UNDO_ROTATE:
+            undorotate();
+            break;
+
+        default:
+            break;
+        }
+    }
+
+    // Imprime en la terminal los stacks, solo para debug
+    void print_stacks()
+    {
+        std::stack<Movement> historial(this->history_stack);
+        std::stack<Movement> undos(this->undo_stack);
+
+        std::cout << "HISTORIAL" << std::endl;
+        while (!historial.empty())
+        {
+            std::cout << historial.top().to_string() << " => ";
+            historial.pop();
+        }
+        std::cout << "NULL";
+
+        std::cout << std::endl
+                  << "UNDOS" << std::endl;
+        while (!historial.empty())
+        {
+            std::cout << historial.top().to_string() << " => ";
+            historial.pop();
+        }
+        std::cout << "NULL" << std::endl;
     }
 
 private:
