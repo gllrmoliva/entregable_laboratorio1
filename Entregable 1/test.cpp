@@ -13,11 +13,15 @@ int main()
 {
     moving_image im;
 
-    Movement newMov = Movement(MOVE_LEFT, 10);
-    std::cout << newMov.command << std::endl;
-    std::cout << newMov.inv_command << std::endl;
+    im.rotate();
+    im.move_down(100);
+    im.move_up(2000);
+    im.undorotate();
+    im.redo();
+    im.redo();
+    im.redo();
+    im.print_stacks();
 
-    
     /* NOTA 1: Si usan el mismo nombre para las imágenes, entonces cada llamada al
     método draw() sobreescribirá a la imagen */
 
