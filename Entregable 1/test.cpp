@@ -16,17 +16,17 @@ int main()
     std::cout << std::endl;
     im.draw("image1.png");
 
-    im.move_up(100);
+    im.rotate();
     im.print_stacks();
     std::cout << std::endl;
     im.draw("image2.png");
 
-    im.move_right(100);
+    im.undorotate();
     im.print_stacks();
     std::cout << std::endl;
     im.draw("image3.png");
 
-    im.undo();
+    im.move_right(100);
     im.print_stacks();
     std::cout << std::endl;
     im.draw("image4.png");
@@ -36,16 +36,21 @@ int main()
     std::cout << std::endl;
     im.draw("image5.png");
 
-    im.redo();
+    im.undo();
     im.print_stacks();
     std::cout << std::endl;
     im.draw("image6.png");
 
-    im.move_left(243);
+    im.redo();
     im.print_stacks();
     std::cout << std::endl;
     im.draw("image7.png");
-    
+
+    im.move_left(243);
+    im.print_stacks();
+    std::cout << std::endl;
+    im.draw("image8.png");
+
     /* NOTA 1: Si usan el mismo nombre para las imágenes, entonces cada llamada al
     método draw() sobreescribirá a la imagen */
 
