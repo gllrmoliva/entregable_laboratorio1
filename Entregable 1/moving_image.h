@@ -22,23 +22,31 @@ private:
 
     std::queue<Movement> all_movements; // Todavía no se muy bien que vamos a hacer con este
 
-    // Función para realizar un movimiento en base al struct de Movement. 
+
+    
+    // Función para realizar un movimiento en base al struct de Movement.
+    // IMPORTANTE: esto no es una interfaz para el usuario, por lo que llama
+    // a la función privada move(), y no realizará cambios a los stacks de historial.
     void move_from_movement(Movement movement) {
         Command cmd = movement.command;
         int arg = movement.arg;
         switch (cmd)
         {
         case MOVE_LEFT:
-            move_left(arg);
+            // Un mov a la izquierda es traslacion eje x negativa.
+            move(-1*arg, 0);
             break;
         case MOVE_RIGHT:
-            move_right(arg);
+            // Un mov a la derecha es traslacion eje x positiva.
+            move(arg, 0);
             break;
         case MOVE_UP:
-            move_up(arg);
+            // Un mov hacia arriba es traslacion eje y negativa.
+            move(0, -1*arg);
             break;
         case MOVE_DOWN:
-            move_down(arg);
+            // Un mov hacia abajo es traslacion eje y positiva.
+            move(0, arg);
             break;
         case ROTATE:
             rotate();
@@ -50,6 +58,79 @@ private:
         default:
             break;
         }
+    }
+
+    // Función de movimiento, recordar que el eje x es positivo a la derecha, eje y hacia abajo.
+    void move(int d_x, int d_y) {
+        unsigned char tmp_layer[H_IMG][W_IMG];
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = 0; j < W_IMG; j++) {
+                int new_x, new_y;
+                if (d_x >= 0) {
+                    new_x = (j + d_x) % W_IMG;
+                } else {
+                    new_x = W_IMG - 1 - (W_IMG - 1 - j - d_x) % W_IMG;
+                }
+
+                if (d_y >= 0) {
+                    new_y = (i + d_y) % H_IMG;
+                } else {
+                    new_y = H_IMG - 1 - (H_IMG - 1 - i - d_y) % H_IMG;
+                }
+
+                // Movemos
+                tmp_layer[new_y][new_x] = red_layer[i][j];
+            }
+
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = 0; j < W_IMG; j++)
+                red_layer[i][j] = tmp_layer[i][j];
+
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = 0; j < W_IMG; j++) {
+                int new_x, new_y;
+                if (d_x >= 0) {
+                    new_x = (j + d_x) % W_IMG;
+                } else {
+                    new_x = W_IMG - 1 - (W_IMG - 1 - j - d_x) % W_IMG;
+                }
+
+                if (d_y >= 0) {
+                    new_y = (i + d_y) % H_IMG;
+                } else {
+                    new_y = H_IMG - 1 - (H_IMG - 1 - i - d_y) % H_IMG;
+                }
+
+                // Movemos
+                tmp_layer[new_y][new_x] = green_layer[i][j];
+            }
+
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = 0; j < W_IMG; j++)
+                green_layer[i][j] = tmp_layer[i][j];
+
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = 0; j < W_IMG; j++) {
+                int new_x, new_y;
+                if (d_x >= 0) {
+                    new_x = (j + d_x) % W_IMG;
+                } else {
+                    new_x = W_IMG - 1 - (W_IMG - 1 - j - d_x) % W_IMG;
+                }
+
+                if (d_y >= 0) {
+                    new_y = (i + d_y) % H_IMG;
+                } else {
+                    new_y = H_IMG - 1 - (H_IMG - 1 - i - d_y) % H_IMG;
+                }
+
+                // Movemos
+                tmp_layer[new_y][new_x] = blue_layer[i][j];
+            }
+
+        for (int i = 0; i < H_IMG; i++)
+            for (int j = 0; j < W_IMG; j++)
+                blue_layer[i][j] = tmp_layer[i][j];
     }
 
 public:
@@ -117,49 +198,13 @@ public:
         _draw(nb);
     }
 
+    
+
+
     // Función que similar desplazar la imagen, de manera circular, d pixeles a la izquierda
     void move_left(int d)
     {
-        unsigned char tmp_layer[H_IMG][W_IMG];
-
-        // Mover la capa roja
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = 0; j < W_IMG - d; j++)
-                tmp_layer[i][j] = red_layer[i][j + d];
-
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = W_IMG - d, k = 0; j < W_IMG; j++, k++)
-                tmp_layer[i][j] = red_layer[i][k];
-
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = 0; j < W_IMG; j++)
-                red_layer[i][j] = tmp_layer[i][j];
-
-        // Mover la capa verde
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = 0; j < W_IMG - d; j++)
-                tmp_layer[i][j] = green_layer[i][j + d];
-
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = W_IMG - d, k = 0; j < W_IMG; j++, k++)
-                tmp_layer[i][j] = green_layer[i][k];
-
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = 0; j < W_IMG; j++)
-                green_layer[i][j] = tmp_layer[i][j];
-
-        // Mover la capa azul
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = 0; j < W_IMG - d; j++)
-                tmp_layer[i][j] = blue_layer[i][j + d];
-
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = W_IMG - d, k = 0; j < W_IMG; j++, k++)
-                tmp_layer[i][j] = blue_layer[i][k];
-
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = 0; j < W_IMG; j++)
-                blue_layer[i][j] = tmp_layer[i][j];
+        this->move(-1*d, 0);
 
         history_stack.push(Movement(MOVE_LEFT, d));
 
@@ -168,52 +213,56 @@ public:
         {
             undo_stack.pop();
         }
+
+        // unsigned char tmp_layer[H_IMG][W_IMG];
+
+        // // Mover la capa roja
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = 0; j < W_IMG - d; j++)
+        //         tmp_layer[i][j] = red_layer[i][j + d];
+
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = W_IMG - d, k = 0; j < W_IMG; j++, k++)
+        //         tmp_layer[i][j] = red_layer[i][k];
+
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = 0; j < W_IMG; j++)
+        //         red_layer[i][j] = tmp_layer[i][j];
+
+        // // Mover la capa verde
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = 0; j < W_IMG - d; j++)
+        //         tmp_layer[i][j] = green_layer[i][j + d];
+
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = W_IMG - d, k = 0; j < W_IMG; j++, k++)
+        //         tmp_layer[i][j] = green_layer[i][k];
+
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = 0; j < W_IMG; j++)
+        //         green_layer[i][j] = tmp_layer[i][j];
+
+        // // Mover la capa azul
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = 0; j < W_IMG - d; j++)
+        //         tmp_layer[i][j] = blue_layer[i][j + d];
+
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = W_IMG - d, k = 0; j < W_IMG; j++, k++)
+        //         tmp_layer[i][j] = blue_layer[i][k];
+
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = 0; j < W_IMG; j++)
+        //         blue_layer[i][j] = tmp_layer[i][j];
+
+        
     }
 
     // Función que similar desplazar la imagen, de manera circular, d pixeles a la derecha
     void move_right(int d)
     {
 
-        unsigned char tmp_layer[H_IMG][W_IMG];
-
-        // Mover la capa roja hacia la derecha
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = d; j < W_IMG; j++)
-                tmp_layer[i][j] = red_layer[i][j - d];
-
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = 0, k = W_IMG - d; j < d; j++, k++)
-                tmp_layer[i][j] = red_layer[i][k];
-
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = 0; j < W_IMG; j++)
-                red_layer[i][j] = tmp_layer[i][j];
-
-        // Mover la capa verde hacia la derecha
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = d; j < W_IMG; j++)
-                tmp_layer[i][j] = green_layer[i][j - d];
-
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = 0, k = W_IMG - d; j < d; j++, k++)
-                tmp_layer[i][j] = green_layer[i][k];
-
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = 0; j < W_IMG; j++)
-                green_layer[i][j] = tmp_layer[i][j];
-
-        // Mover la capa azul hacia la derecha
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = d; j < W_IMG; j++)
-                tmp_layer[i][j] = blue_layer[i][j - d];
-
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = 0, k = W_IMG - d; j < d; j++, k++)
-                tmp_layer[i][j] = blue_layer[i][k];
-
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = 0; j < W_IMG; j++)
-                blue_layer[i][j] = tmp_layer[i][j];
+        this->move(d, 0);
         history_stack.push(Movement(MOVE_RIGHT, d));
 
         // Por ahora solo voy a eliminar con pop los elementos de stack, aunque esto no es lo mas optimo
@@ -221,35 +270,55 @@ public:
         {
             undo_stack.pop();
         }
+
+        // unsigned char tmp_layer[H_IMG][W_IMG];
+
+        // // Mover la capa roja hacia la derecha
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = d; j < W_IMG; j++)
+        //         tmp_layer[i][j] = red_layer[i][j - d];
+
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = 0, k = W_IMG - d; j < d; j++, k++)
+        //         tmp_layer[i][j] = red_layer[i][k];
+
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = 0; j < W_IMG; j++)
+        //         red_layer[i][j] = tmp_layer[i][j];
+
+        // // Mover la capa verde hacia la derecha
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = d; j < W_IMG; j++)
+        //         tmp_layer[i][j] = green_layer[i][j - d];
+
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = 0, k = W_IMG - d; j < d; j++, k++)
+        //         tmp_layer[i][j] = green_layer[i][k];
+
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = 0; j < W_IMG; j++)
+        //         green_layer[i][j] = tmp_layer[i][j];
+
+        // // Mover la capa azul hacia la derecha
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = d; j < W_IMG; j++)
+        //         tmp_layer[i][j] = blue_layer[i][j - d];
+
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = 0, k = W_IMG - d; j < d; j++, k++)
+        //         tmp_layer[i][j] = blue_layer[i][k];
+
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = 0; j < W_IMG; j++)
+        //         blue_layer[i][j] = tmp_layer[i][j];
+        
     }
 
     // Función que similar desplazar la imagen, de manera circular, d pixeles hacia abajo
     void move_down(int d)
     {
-        unsigned char tmp_layer[H_IMG][W_IMG];
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = 0; j < W_IMG; j++)
-                tmp_layer[(i + d) % H_IMG][j] = red_layer[i][j];
 
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = 0; j < W_IMG; j++)
-                red_layer[i][j] = tmp_layer[i][j];
-
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = 0; j < W_IMG; j++)
-                tmp_layer[(i + d) % H_IMG][j] = green_layer[i][j];
-
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = 0; j < W_IMG; j++)
-                green_layer[i][j] = tmp_layer[i][j];
-
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = 0; j < W_IMG; j++)
-                tmp_layer[(i + d) % H_IMG][j] = blue_layer[i][j];
-
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = 0; j < W_IMG; j++)
-                blue_layer[i][j] = tmp_layer[i][j];
+        this->move(0, d);
         history_stack.push(Movement(MOVE_DOWN, d));
 
         // Por ahora solo voy a eliminar con pop los elementos de stack, aunque esto no es lo mas optimo
@@ -257,37 +326,38 @@ public:
         {
             undo_stack.pop();
         }
+
+        // unsigned char tmp_layer[H_IMG][W_IMG];
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = 0; j < W_IMG; j++)
+        //         tmp_layer[(i + d) % H_IMG][j] = red_layer[i][j];
+
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = 0; j < W_IMG; j++)
+        //         red_layer[i][j] = tmp_layer[i][j];
+
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = 0; j < W_IMG; j++)
+        //         tmp_layer[(i + d) % H_IMG][j] = green_layer[i][j];
+
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = 0; j < W_IMG; j++)
+        //         green_layer[i][j] = tmp_layer[i][j];
+
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = 0; j < W_IMG; j++)
+        //         tmp_layer[(i + d) % H_IMG][j] = blue_layer[i][j];
+
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = 0; j < W_IMG; j++)
+        //         blue_layer[i][j] = tmp_layer[i][j];
+        
     }
 
     // Función que similar desplazar la imagen, de manera circular, d pixeles arriba
     void move_up(int d)
     {
-        unsigned char tmp_layer[H_IMG][W_IMG];
-
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = 0; j < W_IMG; j++)
-                tmp_layer[i][j] = red_layer[(i + d) % H_IMG][j];
-
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = 0; j < W_IMG; j++)
-                red_layer[i][j] = tmp_layer[i][j];
-
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = 0; j < W_IMG; j++)
-                tmp_layer[i][j] = green_layer[(i + d) % H_IMG][j];
-
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = 0; j < W_IMG; j++)
-                green_layer[i][j] = tmp_layer[i][j];
-
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = 0; j < W_IMG; j++)
-                tmp_layer[i][j] = blue_layer[(i + d) % H_IMG][j];
-
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = 0; j < W_IMG; j++)
-                blue_layer[i][j] = tmp_layer[i][j];
-
+        this->move(0, -1*d);
         history_stack.push(Movement(MOVE_UP, d));
 
         // Por ahora solo voy a eliminar con pop los elementos de stack, aunque esto no es lo mas optimo
@@ -295,6 +365,32 @@ public:
         {
             undo_stack.pop();
         }
+
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = 0; j < W_IMG; j++)
+        //         tmp_layer[i][j] = red_layer[(i + d) % H_IMG][j];
+
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = 0; j < W_IMG; j++)
+        //         red_layer[i][j] = tmp_layer[i][j];
+
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = 0; j < W_IMG; j++)
+        //         tmp_layer[i][j] = green_layer[(i + d) % H_IMG][j];
+
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = 0; j < W_IMG; j++)
+        //         green_layer[i][j] = tmp_layer[i][j];
+
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = 0; j < W_IMG; j++)
+        //         tmp_layer[i][j] = blue_layer[(i + d) % H_IMG][j];
+
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = 0; j < W_IMG; j++)
+        //         blue_layer[i][j] = tmp_layer[i][j];
+
+        
     }
 
     // Función que similar desplazar la imagen, de manera circular, d pixeles a la derecha
@@ -389,35 +485,26 @@ public:
 
         // Lo dejamos en el stack de undo.
         undo_stack.push(last_movement);
-        std::cout << std::endl;
 
         // Calculamos el movimiento inverso
         Command inverse_command = last_movement.inv_command;
         Movement inverse_movement = Movement(inverse_command, last_movement.arg);
         
-        std::stack<Movement> stack_previo(undo_stack); 
-        // uh oooh problemaaaaa, esto se pitea el stack de undo!!!
+        /* Tener en cuenta que esto no deja el movimiento inverso en el stack historial. */
         move_from_movement(inverse_movement);
-        // pero vuelve desde las cenizas!
-        this->undo_stack = stack_previo;
-
-        // No queremos que el movimiento inverso quede en el stack de movimientos.
-        // Esto es feo, pero es la manera más directa de hacerlo por ahora:
-        history_stack.pop();
     }
 
     void redo()
     {
-        // Removemos el movimiento del historial
+        // Removemos el movimiento del historial de stack
         Movement last_undo(undo_stack.top());
         undo_stack.pop();
 
-        std::stack<Movement> stack_previo(undo_stack); 
-        // uh oooh problemaaaaa, esto se pitea el stack de undo!!!
+        // Lo devolvemos al historial de movimientos
+        history_stack.push(last_undo);
+
+        /* Tener en cuenta que esto no deja el movimiento en el stack historial. */
         move_from_movement(last_undo); 
-        // pero vuelve desde las cenizas!
-        this->undo_stack = stack_previo;
-        return;
     }
 
     // todo:  vamos a tener que pensar el caso undo() -> repeat() -> repeat()
