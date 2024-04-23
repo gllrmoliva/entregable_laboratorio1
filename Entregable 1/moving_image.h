@@ -286,6 +286,8 @@ public:
 
         history_stack.push(Movement(MOVE_LEFT, d));
 
+        all_movements.push(Movement(MOVE_LEFT, d));
+
         // Por ahora solo voy a eliminar con pop los elementos de stack, aunque esto no es lo mas optimo
         while (!undo_stack.empty())
         {
@@ -341,6 +343,8 @@ public:
         this->move(d, 0);
         history_stack.push(Movement(MOVE_RIGHT, d));
 
+        all_movements.push(Movement(MOVE_RIGHT, d));
+
         // Por ahora solo voy a eliminar con pop los elementos de stack, aunque esto no es lo mas optimo
         while (!undo_stack.empty())
         {
@@ -394,7 +398,10 @@ public:
     {
 
         this->move(0, d);
+
         history_stack.push(Movement(MOVE_DOWN, d));
+
+        all_movements.push(Movement(MOVE_DOWN, d));
 
         // Por ahora solo voy a eliminar con pop los elementos de stack, aunque esto no es lo mas optimo
         while (!undo_stack.empty())
@@ -432,7 +439,10 @@ public:
     void move_up(int d)
     {
         this->move(0, -1 * d);
+
         history_stack.push(Movement(MOVE_UP, d));
+
+        all_movements.push(Movement(MOVE_UP, d));
 
         // Por ahora solo voy a eliminar con pop los elementos de stack, aunque esto no es lo mas optimo
         while (!undo_stack.empty())
@@ -472,6 +482,8 @@ public:
     {
         rotation(false);
         history_stack.push(Movement(ROTATE, 0));
+
+        all_movements.push(Movement(ROTATE, 0));
 
         // Por ahora solo voy a eliminar con pop los elementos de stack, aunque esto no es lo mas optimo
         while (!undo_stack.empty())
@@ -514,6 +526,8 @@ public:
         rotation(true);
 
         history_stack.push(Movement(UNDO_ROTATE, 0));
+
+        all_movements.push(Movement(UNDO_ROTATE, 0));
 
         // Por ahora solo voy a eliminar con pop los elementos de stack, aunque esto no es lo mas optimo
         while (!undo_stack.empty())
@@ -565,6 +579,8 @@ public:
 
         /* Tener en cuenta que esto no deja el movimiento inverso en el stack historial. */
         move_from_movement(inverse_movement);
+
+        all_movements.push(inverse_movement);
     }
 
     void redo()
@@ -578,6 +594,8 @@ public:
 
         /* Tener en cuenta que esto no deja el movimiento en el stack historial. */
         move_from_movement(last_undo);
+
+        all_movements.push(last_undo);
     }
 
     // todo:  vamos a tener que pensar el caso undo() -> repeat() -> repeat()
@@ -589,15 +607,19 @@ public:
         Movement last_movement(history_stack.top());
 
         move_from_movement(last_movement);
+
+        all_movements.push(last_movement);
     }
 
     // Imprime en la terminal los stacks, solo para debug
     void print_stacks()
     {
-        std::stack<Movement> historial(this->history_stack);
-        std::stack<Movement> undos(this->undo_stack);
+        std::stack<Movement> historial = this->history_stack;
+        std::stack<Movement> undos = this->undo_stack;
+        std::queue<Movement> repeat_all = this->all_movements;
 
-        std::cout << "HISTORIAL" << std::endl;
+        std::cout
+            << "HISTORIAL" << std::endl;
         while (!historial.empty())
         {
             std::cout << historial.top().to_string() << " => ";
@@ -611,6 +633,14 @@ public:
         {
             std::cout << undos.top().to_string() << " => ";
             undos.pop();
+        }
+        std::cout << "NULL" << std::endl;
+
+        std::cout << "REPEAT ALL" << std::endl;
+        while (!repeat_all.empty())
+        {
+            std::cout << repeat_all.front().to_string() << " => ";
+            repeat_all.pop();
         }
         std::cout << "NULL" << std::endl;
     }
