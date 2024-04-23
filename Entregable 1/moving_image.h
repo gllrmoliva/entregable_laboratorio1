@@ -19,6 +19,7 @@ private:
     unsigned char **blue_layer;  // Capa de tonalidades azules
     std::stack<Movement> history_stack;
     std::stack<Movement> undo_stack;
+    std::queue<Movement> all_movements; // Todavía no se muy bien que vamos a hacer con este
 
     // std::queue<Movement> all_movements; // Todavía no se muy bien que vamos a hacer con este
 
@@ -216,7 +217,6 @@ private:
 
 public:
 
-    std::queue<Movement> all_movements; // Todavía no se muy bien que vamos a hacer con este
     // Constructor de la imagen. Se crea una imagen por defecto
     moving_image()
     {
