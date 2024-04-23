@@ -51,7 +51,6 @@ int main()
     std::cout << std::endl;
     im.draw("image8.png");
 
->>>>>>> main
     /* NOTA 1: Si usan el mismo nombre para las imágenes, entonces cada llamada al
     método draw() sobreescribirá a la imagen */
 
