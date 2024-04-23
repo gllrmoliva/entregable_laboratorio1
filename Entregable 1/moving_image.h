@@ -20,7 +20,7 @@ private:
     std::stack<Movement> history_stack;
     std::stack<Movement> undo_stack;
 
-    std::queue<Movement> all_movements; // Todavía no se muy bien que vamos a hacer con este
+    // std::queue<Movement> all_movements; // Todavía no se muy bien que vamos a hacer con este
 
     // Función para realizar un movimiento en base al struct de Movement.
     // IMPORTANTE: esto no es una interfaz para el usuario, por lo que llama
@@ -215,6 +215,8 @@ private:
     }
 
 public:
+
+    std::queue<Movement> all_movements; // Todavía no se muy bien que vamos a hacer con este
     // Constructor de la imagen. Se crea una imagen por defecto
     moving_image()
     {
@@ -598,10 +600,10 @@ public:
         img.draw("im1.png");
 
         int i = 2;
-        while (!all_movements.empty()) {
+        while (!movements.empty()) {
             img.move_from_movement(movements.front());
             movements.pop();
-            std::string name = "im" + std::to_string(i) + ".png";
+            std::string name = "im" + std::to_string(i++) + ".png";
             img.draw(name.c_str());
         }
     }

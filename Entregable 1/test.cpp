@@ -6,11 +6,18 @@
  */
 
 #include "moving_image.h"
+#include "command.h"
 #include <unistd.h> // para sleep (linux). Usar  #include<windows.h> para Windows
 
 int main()
 {
     moving_image im;
+
+    im.all_movements.push(Movement(ROTATE, 0));
+    im.all_movements.push(Movement(MOVE_RIGHT, 150));
+    im.all_movements.push(Movement(MOVE_UP, 200));
+    im.all_movements.push(Movement(MOVE_LEFT, 300));
+    im.repeat_all();
 
     im.print_stacks();
     std::cout << std::endl;
