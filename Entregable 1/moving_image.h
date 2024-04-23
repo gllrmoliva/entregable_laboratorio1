@@ -20,21 +20,20 @@ private:
     std::stack<Movement> history_stack;
     std::stack<Movement> undo_stack;
 
-    std::queue<Movement> all_movements =  // Todavía no se muy bien que vamos a hacer con este
+    std::queue<Movement> all_movements; // Todavía no se muy bien que vamos a hacer con este
 
-
-    
     // Función para realizar un movimiento en base al struct de Movement.
     // IMPORTANTE: esto no es una interfaz para el usuario, por lo que llama
-    // a la función privada move(), y no realizará cambios a los stacks de historial.
-    void move_from_movement(Movement movement) {
+    // a la función privada move() y rotation(), y no realizará cambios a los stacks de historial.
+    void move_from_movement(Movement movement)
+    {
         Command cmd = movement.command;
         int arg = movement.arg;
         switch (cmd)
         {
         case MOVE_LEFT:
             // Un mov a la izquierda es traslacion eje x negativa.
-            move(-1*arg, 0);
+            move(-1 * arg, 0);
             break;
         case MOVE_RIGHT:
             // Un mov a la derecha es traslacion eje x positiva.
@@ -42,17 +41,19 @@ private:
             break;
         case MOVE_UP:
             // Un mov hacia arriba es traslacion eje y negativa.
-            move(0, -1*arg);
+            move(0, -1 * arg);
             break;
         case MOVE_DOWN:
             // Un mov hacia abajo es traslacion eje y positiva.
             move(0, arg);
             break;
         case ROTATE:
-            rotate();
+            // Rotación de 90 grados en contra de las manecillas del reloj
+            rotation(false);
             break;
         case UNDO_ROTATE:
-            undorotate();
+            // Rotación de 90 grados en sentido de las manecillas del reloj
+            rotation(true);
             break;
 
         default:
@@ -61,20 +62,28 @@ private:
     }
 
     // Función de movimiento, recordar que el eje x es positivo a la derecha, eje y hacia abajo.
-    void move(int d_x, int d_y) {
+    void move(int d_x, int d_y)
+    {
         unsigned char tmp_layer[H_IMG][W_IMG];
         for (int i = 0; i < H_IMG; i++)
-            for (int j = 0; j < W_IMG; j++) {
+            for (int j = 0; j < W_IMG; j++)
+            {
                 int new_x, new_y;
-                if (d_x >= 0) {
+                if (d_x >= 0)
+                {
                     new_x = (j + d_x) % W_IMG;
-                } else {
+                }
+                else
+                {
                     new_x = W_IMG - 1 - (W_IMG - 1 - j - d_x) % W_IMG;
                 }
 
-                if (d_y >= 0) {
+                if (d_y >= 0)
+                {
                     new_y = (i + d_y) % H_IMG;
-                } else {
+                }
+                else
+                {
                     new_y = H_IMG - 1 - (H_IMG - 1 - i - d_y) % H_IMG;
                 }
 
@@ -87,17 +96,24 @@ private:
                 red_layer[i][j] = tmp_layer[i][j];
 
         for (int i = 0; i < H_IMG; i++)
-            for (int j = 0; j < W_IMG; j++) {
+            for (int j = 0; j < W_IMG; j++)
+            {
                 int new_x, new_y;
-                if (d_x >= 0) {
+                if (d_x >= 0)
+                {
                     new_x = (j + d_x) % W_IMG;
-                } else {
+                }
+                else
+                {
                     new_x = W_IMG - 1 - (W_IMG - 1 - j - d_x) % W_IMG;
                 }
 
-                if (d_y >= 0) {
+                if (d_y >= 0)
+                {
                     new_y = (i + d_y) % H_IMG;
-                } else {
+                }
+                else
+                {
                     new_y = H_IMG - 1 - (H_IMG - 1 - i - d_y) % H_IMG;
                 }
 
@@ -110,17 +126,24 @@ private:
                 green_layer[i][j] = tmp_layer[i][j];
 
         for (int i = 0; i < H_IMG; i++)
-            for (int j = 0; j < W_IMG; j++) {
+            for (int j = 0; j < W_IMG; j++)
+            {
                 int new_x, new_y;
-                if (d_x >= 0) {
+                if (d_x >= 0)
+                {
                     new_x = (j + d_x) % W_IMG;
-                } else {
+                }
+                else
+                {
                     new_x = W_IMG - 1 - (W_IMG - 1 - j - d_x) % W_IMG;
                 }
 
-                if (d_y >= 0) {
+                if (d_y >= 0)
+                {
                     new_y = (i + d_y) % H_IMG;
-                } else {
+                }
+                else
+                {
                     new_y = H_IMG - 1 - (H_IMG - 1 - i - d_y) % H_IMG;
                 }
 
@@ -131,6 +154,64 @@ private:
         for (int i = 0; i < H_IMG; i++)
             for (int j = 0; j < W_IMG; j++)
                 blue_layer[i][j] = tmp_layer[i][j];
+    }
+
+    /*Realiza una rotación contra las agujas del reloj si se pone true y se hace una rotación
+    hacia las agujas del reloj si se pone false. El argumento *is_undo* indica si la rotación
+    se está haciendo con fines de transformar la imagen o para "eliminar" una rotación ya hecha
+     con anterioridad.
+    */
+    void rotation(bool is_undo)
+    {
+        /*
+        Los if's determinan el orden en que se transpone-refleja la matriz, ya que
+        dependiendo del orden la rotación se hace en contra o hacia las agujas del reloj
+        */
+
+        // transponemos las matrices
+        if (is_undo == false)
+        {
+            for (int i = 0; i < H_IMG; i++)
+                for (int j = i + 1; j < W_IMG; j++)
+                    std::swap(red_layer[i][j], red_layer[j][i]);
+
+            for (int i = 0; i < H_IMG; i++)
+                for (int j = i + 1; j < W_IMG; j++)
+                    std::swap(blue_layer[i][j], blue_layer[j][i]);
+
+            for (int i = 0; i < H_IMG; i++)
+                for (int j = i + 1; j < W_IMG; j++)
+                    std::swap(green_layer[i][j], green_layer[j][i]);
+        }
+
+        // reflejamos las matrices horizontalmente
+        for (int i = 0; i < H_IMG / 2; i++)
+            for (int j = 0; j < W_IMG; j++)
+                std::swap(red_layer[i][j], red_layer[H_IMG - i - 1][j]);
+
+        for (int i = 0; i < H_IMG / 2; i++)
+            for (int j = 0; j < W_IMG; j++)
+                std::swap(blue_layer[i][j], blue_layer[H_IMG - i - 1][j]);
+
+        for (int i = 0; i < H_IMG / 2; i++)
+            for (int j = 0; j < W_IMG; j++)
+                std::swap(green_layer[i][j], green_layer[H_IMG - i - 1][j]);
+
+        // transponemos las matrices
+        if (is_undo == true)
+        {
+            for (int i = 0; i < H_IMG; i++)
+                for (int j = i + 1; j < W_IMG; j++)
+                    std::swap(red_layer[i][j], red_layer[j][i]);
+
+            for (int i = 0; i < H_IMG; i++)
+                for (int j = i + 1; j < W_IMG; j++)
+                    std::swap(blue_layer[i][j], blue_layer[j][i]);
+
+            for (int i = 0; i < H_IMG; i++)
+                for (int j = i + 1; j < W_IMG; j++)
+                    std::swap(green_layer[i][j], green_layer[j][i]);
+        }
     }
 
 public:
@@ -198,13 +279,10 @@ public:
         _draw(nb);
     }
 
-    
-
-
     // Función que similar desplazar la imagen, de manera circular, d pixeles a la izquierda
     void move_left(int d)
     {
-        this->move(-1*d, 0);
+        this->move(-1 * d, 0);
 
         history_stack.push(Movement(MOVE_LEFT, d));
 
@@ -254,8 +332,6 @@ public:
         // for (int i = 0; i < H_IMG; i++)
         //     for (int j = 0; j < W_IMG; j++)
         //         blue_layer[i][j] = tmp_layer[i][j];
-
-        
     }
 
     // Función que similar desplazar la imagen, de manera circular, d pixeles a la derecha
@@ -311,7 +387,6 @@ public:
         // for (int i = 0; i < H_IMG; i++)
         //     for (int j = 0; j < W_IMG; j++)
         //         blue_layer[i][j] = tmp_layer[i][j];
-        
     }
 
     // Función que similar desplazar la imagen, de manera circular, d pixeles hacia abajo
@@ -351,13 +426,12 @@ public:
         // for (int i = 0; i < H_IMG; i++)
         //     for (int j = 0; j < W_IMG; j++)
         //         blue_layer[i][j] = tmp_layer[i][j];
-        
     }
 
     // Función que similar desplazar la imagen, de manera circular, d pixeles arriba
     void move_up(int d)
     {
-        this->move(0, -1*d);
+        this->move(0, -1 * d);
         history_stack.push(Movement(MOVE_UP, d));
 
         // Por ahora solo voy a eliminar con pop los elementos de stack, aunque esto no es lo mas optimo
@@ -389,8 +463,6 @@ public:
         // for (int i = 0; i < H_IMG; i++)
         //     for (int j = 0; j < W_IMG; j++)
         //         blue_layer[i][j] = tmp_layer[i][j];
-
-        
     }
 
     // Función que similar desplazar la imagen, de manera circular, d pixeles a la derecha
@@ -398,34 +470,7 @@ public:
     // toda +90 grados
     void rotate()
     {
-        // Rotamos la capa roja
-        // Transponemos la matriz
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = i + 1; j < W_IMG; j++)
-                std::swap(red_layer[i][j], red_layer[j][i]);
-        // Reflejamos la matriz horizontalmente
-        for (int i = 0; i < H_IMG / 2; i++)
-            for (int j = 0; j < W_IMG; j++)
-                std::swap(red_layer[i][j], red_layer[H_IMG - i - 1][j]);
-
-        // Rotamos la capa azul
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = i + 1; j < W_IMG; j++)
-                std::swap(blue_layer[i][j], blue_layer[j][i]);
-
-        for (int i = 0; i < H_IMG / 2; i++)
-            for (int j = 0; j < W_IMG; j++)
-                std::swap(blue_layer[i][j], blue_layer[H_IMG - i - 1][j]);
-
-        // Rotamos la capa verde
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = i + 1; j < W_IMG; j++)
-                std::swap(green_layer[i][j], green_layer[j][i]);
-
-        for (int i = 0; i < H_IMG / 2; i++)
-            for (int j = 0; j < W_IMG; j++)
-                std::swap(green_layer[i][j], green_layer[H_IMG - i - 1][j]);
-
+        rotation(false);
         history_stack.push(Movement(ROTATE, 0));
 
         // Por ahora solo voy a eliminar con pop los elementos de stack, aunque esto no es lo mas optimo
@@ -433,39 +478,40 @@ public:
         {
             undo_stack.pop();
         }
+
+        // // Rotamos la capa roja
+        // // Transponemos la matriz
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = i + 1; j < W_IMG; j++)
+        //         std::swap(red_layer[i][j], red_layer[j][i]);
+        // // Reflejamos la matriz horizontalmente
+        // for (int i = 0; i < H_IMG / 2; i++)
+        //     for (int j = 0; j < W_IMG; j++)
+        //         std::swap(red_layer[i][j], red_layer[H_IMG - i - 1][j]);
+
+        // // Rotamos la capa azul
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = i + 1; j < W_IMG; j++)
+        //         std::swap(blue_layer[i][j], blue_layer[j][i]);
+
+        // for (int i = 0; i < H_IMG / 2; i++)
+        //     for (int j = 0; j < W_IMG; j++)
+        //         std::swap(blue_layer[i][j], blue_layer[H_IMG - i - 1][j]);
+
+        // // Rotamos la capa verde
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = i + 1; j < W_IMG; j++)
+        //         std::swap(green_layer[i][j], green_layer[j][i]);
+
+        // for (int i = 0; i < H_IMG / 2; i++)
+        //     for (int j = 0; j < W_IMG; j++)
+        //         std::swap(green_layer[i][j], green_layer[H_IMG - i - 1][j]);
     }
 
-    // todo: no me gusta mucho esto, pero es la forma mas facil de hacerlo
-    // toda -90 grados
+    // TODO: CREO QUE AHORA ESTE METODO YA NO ES NECESARIO????¿¿¿???
     void undorotate()
     {
-        // Rotamos la capa roja
-        // Reflejamos la matriz horizontalmente
-        for (int i = 0; i < H_IMG / 2; i++)
-            for (int j = 0; j < W_IMG; j++)
-                std::swap(red_layer[i][j], red_layer[H_IMG - i - 1][j]);
-        // Transponemos la matriz
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = i + 1; j < W_IMG; j++)
-                std::swap(red_layer[i][j], red_layer[j][i]);
-
-        // Rotamos la capa azul
-        for (int i = 0; i < H_IMG / 2; i++)
-            for (int j = 0; j < W_IMG; j++)
-                std::swap(blue_layer[i][j], blue_layer[H_IMG - i - 1][j]);
-
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = i + 1; j < W_IMG; j++)
-                std::swap(blue_layer[i][j], blue_layer[j][i]);
-
-        // Rotamos la capa verde
-        for (int i = 0; i < H_IMG / 2; i++)
-            for (int j = 0; j < W_IMG; j++)
-                std::swap(green_layer[i][j], green_layer[H_IMG - i - 1][j]);
-
-        for (int i = 0; i < H_IMG; i++)
-            for (int j = i + 1; j < W_IMG; j++)
-                std::swap(green_layer[i][j], green_layer[j][i]);
+        rotation(true);
 
         history_stack.push(Movement(UNDO_ROTATE, 0));
 
@@ -474,8 +520,35 @@ public:
         {
             undo_stack.pop();
         }
-    }
 
+        // // Rotamos la capa roja
+        // // Reflejamos la matriz horizontalmente
+        // for (int i = 0; i < H_IMG / 2; i++)
+        //     for (int j = 0; j < W_IMG; j++)
+        //         std::swap(red_layer[i][j], red_layer[H_IMG - i - 1][j]);
+        // // Transponemos la matriz
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = i + 1; j < W_IMG; j++)
+        //         std::swap(red_layer[i][j], red_layer[j][i]);
+
+        // // Rotamos la capa azul
+        // for (int i = 0; i < H_IMG / 2; i++)
+        //     for (int j = 0; j < W_IMG; j++)
+        //         std::swap(blue_layer[i][j], blue_layer[H_IMG - i - 1][j]);
+
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = i + 1; j < W_IMG; j++)
+        //         std::swap(blue_layer[i][j], blue_layer[j][i]);
+
+        // // Rotamos la capa verde
+        // for (int i = 0; i < H_IMG / 2; i++)
+        //     for (int j = 0; j < W_IMG; j++)
+        //         std::swap(green_layer[i][j], green_layer[H_IMG - i - 1][j]);
+
+        // for (int i = 0; i < H_IMG; i++)
+        //     for (int j = i + 1; j < W_IMG; j++)
+        //         std::swap(green_layer[i][j], green_layer[j][i]);
+    }
 
     void undo()
     {
@@ -489,7 +562,7 @@ public:
         // Calculamos el movimiento inverso
         Command inverse_command = last_movement.inv_command;
         Movement inverse_movement = Movement(inverse_command, last_movement.arg);
-        
+
         /* Tener en cuenta que esto no deja el movimiento inverso en el stack historial. */
         move_from_movement(inverse_movement);
     }
@@ -504,7 +577,7 @@ public:
         history_stack.push(last_undo);
 
         /* Tener en cuenta que esto no deja el movimiento en el stack historial. */
-        move_from_movement(last_undo); 
+        move_from_movement(last_undo);
     }
 
     // todo:  vamos a tener que pensar el caso undo() -> repeat() -> repeat()
@@ -516,7 +589,6 @@ public:
         Movement last_movement(history_stack.top());
 
         move_from_movement(last_movement);
-        
     }
 
     void repeat_all()
@@ -548,7 +620,8 @@ public:
         }
         std::cout << "NULL";
 
-        std::cout << std::endl << "UNDOS" << std::endl;
+        std::cout << std::endl
+                  << "UNDOS" << std::endl;
         while (!undos.empty())
         {
             std::cout << undos.top().to_string() << " => ";
