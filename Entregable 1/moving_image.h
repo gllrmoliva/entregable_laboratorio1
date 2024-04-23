@@ -216,7 +216,6 @@ private:
     }
 
 public:
-
     // Constructor de la imagen. Se crea una imagen por defecto
     moving_image()
     {
@@ -568,36 +567,44 @@ public:
 
     void undo()
     {
-        // Removemos el movimiento del historial
-        Movement last_movement(history_stack.top());
-        history_stack.pop();
+        // Si no se puede hacer undo, simplemente no se hace nada (similar a software de dibujo)
+        if (!history_stack.empty())
+        {
+            // Removemos el movimiento del historial
+            Movement last_movement(history_stack.top());
+            history_stack.pop();
 
-        // Lo dejamos en el stack de undo.
-        undo_stack.push(last_movement);
+            // Lo dejamos en el stack de undo.
+            undo_stack.push(last_movement);
 
-        // Calculamos el movimiento inverso
-        Command inverse_command = last_movement.inv_command;
-        Movement inverse_movement = Movement(inverse_command, last_movement.arg);
+            // Calculamos el movimiento inverso
+            Command inverse_command = last_movement.inv_command;
+            Movement inverse_movement = Movement(inverse_command, last_movement.arg);
 
-        /* Tener en cuenta que esto no deja el movimiento inverso en el stack historial. */
-        move_from_movement(inverse_movement);
+            /* Tener en cuenta que esto no deja el movimiento inverso en el stack historial. */
+            move_from_movement(inverse_movement);
 
-        all_movements.push(inverse_movement);
+            all_movements.push(inverse_movement);
+        }
     }
 
     void redo()
     {
-        // Removemos el movimiento del historial de stack
-        Movement last_undo(undo_stack.top());
-        undo_stack.pop();
+        // Si no se puede hacer redo, simplemente no se hace nada (similar a software de dibujo)
+        if (!undo_stack.empty())
+        {
+            // Removemos el movimiento del historial de stack
+            Movement last_undo(undo_stack.top());
+            undo_stack.pop();
 
-        // Lo devolvemos al historial de movimientos
-        history_stack.push(last_undo);
+            // Lo devolvemos al historial de movimientos
+            history_stack.push(last_undo);
 
-        /* Tener en cuenta que esto no deja el movimiento en el stack historial. */
-        move_from_movement(last_undo);
+            /* Tener en cuenta que esto no deja el movimiento en el stack historial. */
+            move_from_movement(last_undo);
 
-        all_movements.push(last_undo);
+            all_movements.push(last_undo);
+        }
     }
 
     // todo:  vamos a tener que pensar el caso undo() -> repeat() -> repeat()
@@ -606,11 +613,15 @@ public:
     // si seria sobreingenieria para algo mas simple
     void repeat()
     {
-        Movement last_movement(history_stack.top());
+        // Si no se puede hacer repeat, simplemente no se hace nada (similar a software de dibujo)
+        if (!history_stack.empty())
+        {
+            Movement last_movement(history_stack.top());
 
-        move_from_movement(last_movement);
+            move_from_movement(last_movement);
 
-        all_movements.push(last_movement);
+            all_movements.push(last_movement);
+        }
     }
 
     void repeat_all()
@@ -620,7 +631,8 @@ public:
         img.draw("im1.png");
 
         int i = 2;
-        while (!movements.empty()) {
+        while (!movements.empty())
+        {
             img.move_from_movement(movements.front());
             movements.pop();
             std::string name = "im" + std::to_string(i++) + ".png";
