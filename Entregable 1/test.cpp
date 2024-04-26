@@ -12,8 +12,6 @@ int main()
 {
     moving_image im;
 
-    im.repeat_all();
-
     im.rotate();
     im.move_right(100);
     im.undo();
